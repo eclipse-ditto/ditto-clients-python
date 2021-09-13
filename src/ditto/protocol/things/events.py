@@ -90,16 +90,16 @@ class Event(_Signal):
         self.path = _Signal._path_thing_feature_definition_format.format(feature_id)
         return self
 
-    def feature_properties(self) -> 'Event':
-        self.path = _Signal._path_thing_feature_properties_format
+    def feature_properties(self, feature_id: str) -> 'Event':
+        self.path = _Signal._path_thing_feature_properties_format.format(feature_id)
         return self
 
     def feature_property(self, feature_id: str, property_path: str) -> 'Event':
         self.path = _Signal._path_thing_feature_property_format.format(feature_id, property_path)
         return self
 
-    def feature_desired_properties(self) -> 'Event':
-        self.path = _Signal._path_thing_feature_desired_properties_format
+    def feature_desired_properties(self, feature_id: str) -> 'Event':
+        self.path = _Signal._path_thing_feature_desired_properties_format.format(feature_id)
         return self
 
     def feature_desired_property(self, feature_id: str, desired_property_path: str) -> 'Event':
