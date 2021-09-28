@@ -185,6 +185,7 @@ class Event(_Signal):
             for changes in all the properties of a certain feature of the thing
         :rtype: Event
         """
+        self.path = _Signal._path_thing_feature_properties_format.format(feature_id)
         return self
 
     def feature_property(self, feature_id: str, property_path: str) -> 'Event':
@@ -213,6 +214,7 @@ class Event(_Signal):
             for changes in all the desired properties of a certain feature of the thing
         :rtype: Event
         """
+        self.path = _Signal._path_thing_feature_desired_properties_format.format(feature_id)
         return self
 
     def feature_desired_property(self, feature_id: str, desired_property_path: str) -> 'Event':
