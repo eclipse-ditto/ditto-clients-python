@@ -26,7 +26,7 @@ class Message(object):
     - the type of the communication - inbox, outbox
     - the entity that was affected - the whole Thing (the default) or a single Feature of the Thing (feature).
     Note: Only one communication type can be configured to the live message - if using the methods for configuring it - only the last one applies.
-    Note: Only one entity that the message targts can be configured to the live message - if using the methods for configuring it - only the last one applies.
+    Note: Only one entity that the message targets can be configured to the live message - if using the methods for configuring it - only the last one applies.
     """
     __inbox = "inbox"
     __outbox = "outbox"
@@ -38,6 +38,23 @@ class Message(object):
                  mailbox: str = None,
                  address_part_of_thing: str = None,
                  payload: Any = None):
+        """
+        Initializes a new Message instance with the provided thing ID, topic, subject, mailbox,
+        addressed part of thing and payload according to the Ditto specification
+
+        :param thing_id: The namespaced entity ID
+        :type thing_id: NamespacedID
+        :param topic: The topic for the message as a Topic instance
+        :type topic: Topic
+        :param subject: The subject of the message
+        :type subject: str
+        :param mailbox: The type of communication (inbox, outbox)
+        :type mailbox: str
+        :param address_part_of_thing: The target of the message (may be the whole thing or a feature of the thing)
+        :type address_part_of_thing: str
+        :param payload: The value that will be applied
+        :type payload: typing.Any
+        """
         if topic:
             self.topic = topic
         else:
@@ -54,22 +71,54 @@ class Message(object):
         self.payload = payload
 
     def inbox(self, subject: str) -> 'Message':
+        """
+        Sets the communication type to inbox and updates the message subject
+
+        :param subject: The new message subject
+        :type subject: str
+        :returns: A new inbox Message instance for the provided subject
+        :rtype: Message
+        """
         self.topic.with_action(TopicAction(subject))
         self.subject = subject
         self.mailbox = Message.__inbox
         return self
 
     def outbox(self, subject: str) -> 'Message':
+        """
+        Sets the communication type to outbox and updates the message subject
+
+        :param subject: The new message subject
+        :type subject: str
+        :returns: A new outbox Message instance for the provided subject
+        :rtype: Message
+        """
         self.topic.with_action(TopicAction(subject))
         self.subject = subject
         self.mailbox = Message.__outbox
         return self
 
     def with_payload(self, payload: Any) -> 'Message':
+        """
+        Sets the payload for the message
+
+        :param payload: The payload for the message
+        :type payload: typing.Any
+        :returns: The updated Message instance with the updated payload
+        :rtype: Message
+        """
         self.payload = payload
         return self
 
     def feature(self, feature_id: str) -> 'Message':
+        """
+        Sets the Message to address a specific Feature
+
+        :param feature_id: The targeted feature of the thing
+        :type feature_id: str
+        :returns: The updated Message instance with the updated addressed part of thing
+        :rtype: Message
+        """
         self.address_part_of_thing = _Signal._path_thing_feature_format.format(feature_id)
         return self
 
@@ -86,7 +135,40 @@ class Message(object):
                  version: str = None,
                  put_metadata: List[Any] = None,
                  **kwargs) -> Envelope:
+        """
+        Prepares the message to be sent by putting it in the Envelope
 
+        :param content_type: The content type which describes the value of Ditto Protocol messages
+        :type content_type: str
+        :param correlation_id: The correlation ID header is used for linking one message with another.
+            It typically links a reply message with its requesting message
+        :type correlation_id: str
+        :param ditto_originator: Contains the first authorization subject of the command that caused the sending
+            of this message. Set by Ditto
+        :type ditto_originator: str
+        :param if_match: Has to conform to RFC-7232 (Conditional Requests). Common used for
+            optimistic locking by specifying the ETag from a previous response and retrieving or
+            modifying a resource only if it already exists
+        :type if_match: str
+        :param if_none_match: Has to conform to RFC-7232 (Conditional Requests). Common used for
+            retrieving or modifying a resource only if it doesn't already exists
+        :type if_none_match: str
+        :param response_required: Whether a response to a command is required or if it may be omitted.
+        :type response_required: bool
+        :param requested_acks: Defining which acknowledgements ("ack") are requested for a command processed by Ditto
+        :type requested_acks: List[str]
+        :param ditto_weak_ack: Marks weak acknowledgements issued by Ditto.
+        :type ditto_weak_ack: bool
+        :param timeout: The timeout value to apply on the Ditto server side
+            e.g. applied when waiting for requested acknowledgements
+        :type timeout: str
+        :param version: Determines the schema version of the payload
+        :type version: str
+        :param put_metadata: Determines which Metadata information is stored in the thing
+        :type put_metadata: List[typing.Any]
+        :returns: The Envelope instance containing topic, path, headers and value
+        :rtype: Envelope
+        """
         payload = self.payload if not hasattr(self.payload, _Signal._payload_converter_func_name) else self.payload.to_ditto_dict()
 
         msg = Envelope().with_topic(self.topic) \
