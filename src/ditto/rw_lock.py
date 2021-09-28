@@ -14,10 +14,16 @@ import threading
 
 class _RWLock:
     def __init__(self):
+        """
+        Initializes read-write lock, using the default Python lock from "threading" module.
+        """
         self._read_condition = threading.Condition(threading.Lock())
         self._readers = 0
 
     def lock_read(self):
+        """
+        Locks the thread for reading.
+        """
         self._read_condition.acquire()
         try:
             self._readers += 1
@@ -25,6 +31,9 @@ class _RWLock:
             self._read_condition.release()
 
     def unlock_read(self):
+        """
+        Unlocks the thread for reading.
+        """
         self._read_condition.acquire()
         try:
             self._readers -= 1
@@ -34,9 +43,15 @@ class _RWLock:
             self._read_condition.release()
 
     def lock_write(self):
+        """
+        Locks the thread for writing.
+        """
         self._read_condition.acquire()
         while self._readers > 0:
             self._read_condition.wait()
 
     def unlock_write(self):
+        """
+        Unlocks the thread for writing.
+        """
         self._read_condition.release()
