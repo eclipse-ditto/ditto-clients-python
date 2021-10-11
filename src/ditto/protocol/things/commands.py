@@ -262,3 +262,4 @@ class Command(_Signal):
         :rtype: Command
         """
         self.topic.with_channel(Topic.CHANNEL_TWIN)
+        return self
