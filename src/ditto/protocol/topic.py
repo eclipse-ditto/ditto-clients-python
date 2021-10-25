@@ -93,6 +93,32 @@ class Topic(object):
                  channel: _TopicChannel = None,
                  criterion: _TopicCriterion = None,
                  action: TopicAction = None):
+        """
+        Initializes a new Topic instance with the provided properties according to the Ditto specification.
+
+        :param namespace: The entity’s namespace in which the entity is located.
+        :type namespace: str
+        :param entity_id: The entity's name to address.
+        :type entity_id: str
+        :param group: Determines whether the Protocol message references the Things Group or the Policies Group.
+        :type group: Topic.GROUP_THINGS, Topic.GROUP_POLICIES
+        :param channel: Specifies whether the Protocol message is addressed to the digital twin,
+            to the actual live device or to none of both.
+        :type channel: Topic.CHANNEL_LIVE, Topic.CHANNEL_TWIN
+        :param criterion: Contains the type of action of the Protocol message in the specified
+            entity group and on the defined channel.
+        :type criterion: Topic.CRITERION_COMMANDS, Topic.CRITERION_EVENTS, Topic.CRITERION_SEARCH,
+            Topic.CRITERION_MESSAGES, Topic.CRITERION_ERRORS
+        :param action: For command, event, and messages criteria, additional actions are available,
+            which further distinguish the purpose of a Protocol message.
+        :type action: Topic.ACTION_CREATE, Topic.ACTION_CREATED, Topic.ACTION_MODIFY, Topic.ACTION_MODIFIED,
+            Topic.ACTION_DELETE, Topic.ACTION_DELETED, Topic.ACTION_RETRIEVE, Topic.ACTION_SUBSCRIBE,
+            Topic.ACTION_REQUEST, Topic.ACTION_CANCEL, Topic.ACTION_NEXT, Topic.ACTION_COMPLETE, Topic.ACTION_FAILED.
+
+            Тhe predefined values are at hand to help for the common predefined use cases by the specification.
+            Custom ones can be created using the TopicAction class and used also to fit other possible use cases.
+            Custom TopicAction instances can be provided for the Live Channel only.
+        """
         self.namespace = namespace
         self.entity_id = entity_id
         self.group = group
@@ -102,69 +128,91 @@ class Topic(object):
 
     def with_namespace(self, namespace: str) -> 'Topic':
         """
-        Configures the namespace of the Topic.
+        Sets the namespace of the current Topic instance to the provided string.
 
-        :param namespace:
-        :return:
+        :param namespace: The entity’s namespace in which the entity is located.
+        :type namespace: str
+        :returns: The updated Topic instance with the provided namespace.
         """
         self.namespace = namespace
         return self
 
     def with_entity_id(self, entity_id: str) -> 'Topic':
         """
-        Configures the namespace of the Topic.
-
-        :param entity_id:
-        :return:
+        Sets the entity_id of the current Topic instance to the provided string.
+        :param entity_id: The entity's name to address.
+        :type entity_id: str
+        :returns: The updated Topic instance with the provided entity_id.
+        :rtype: Topic
         """
         self.entity_id = entity_id
         return self
 
     def with_group(self, group: _TopicGroup) -> 'Topic':
         """
-        Configures the group of the Topic.
+        Sets the group of the current Topic instance to the provided _TopicGroup instance.
 
-        :param group:
-        :return:
+        :param group: Determines whether the Protocol message references the Things Group or the Policies Group.
+        :type group: Topic.GROUP_THINGS, Topic.GROUP_POLICIES
+        :returns: The updated Topic instance with the provided group.
+        :rtype: Topic
         """
         self.group = group
         return self
 
     def with_channel(self, channel: _TopicChannel) -> 'Topic':
         """
-        Configures the channel of the Topic.
+        Sets the channel of the current Topic instance to the provided _TopicChannel instance.
 
-        :param channel:
-        :return:
+        :param channel: Specifies whether the Protocol message is addressed to the digital twin,
+            to the actual live device or to none of both.
+        :type channel: Topic.CHANNEL_LIVE, Topic.CHANNEL_TWIN
+        :returns: The updated Topic instance with the provided channel.
+        :rtype: Topic
         """
         self.channel = channel
         return self
 
     def with_criterion(self, criterion: _TopicCriterion) -> 'Topic':
         """
-        Configures the criterion of the Topic.
+        Sets the criterion of the current Topic instance to the provided _TopicCriterion instance.
 
-        :param criterion:
-        :return:
+        :param criterion: Contains the type of action of the Protocol message in the specified
+            entity group and on the defined channel.
+        :type criterion: Topic.CRITERION_COMMANDS, Topic.CRITERION_EVENTS, Topic.CRITERION_SEARCH,
+            Topic.CRITERION_MESSAGES, Topic.CRITERION_ERRORS
+        :returns: The updated Topic instance with the provided criterion.
+        :rtype: Topic
         """
         self.criterion = criterion
         return self
 
     def with_action(self, action: TopicAction) -> 'Topic':
         """
-        Configures the action of the Topic.
+        Sets the action of the current Topic instance to the provided TopicAction instance.
 
-        :param action:
-        :return:
+        :param action: For command, event, and messages criteria, additional actions are available,
+            which further distinguish the purpose of a Protocol message.
+        :type action: Topic.ACTION_CREATE, Topic.ACTION_CREATED, Topic.ACTION_MODIFY, Topic.ACTION_MODIFIED,
+            Topic.ACTION_DELETE, Topic.ACTION_DELETED, Topic.ACTION_RETRIEVE, Topic.ACTION_SUBSCRIBE,
+            Topic.ACTION_REQUEST, Topic.ACTION_CANCEL, Topic.ACTION_NEXT, Topic.ACTION_COMPLETE, Topic.ACTION_FAILED.
+
+            Тhe predefined values are at hand to help for the common predefined use cases by the specification.
+            Custom ones can be created using the TopicAction class and used also to fit the other use cases
+            expected in the specification.
+            (See e.g. https://www.eclipse.org/ditto/2.0/protocol-specification-things-messages.html)
+        :returns: The updated Topic instance with the provided action.
+        :rtype: Topic
         """
         self.action = action
         return self
 
     def __str__(self):
         """
-        Provides the string representation of a Topic entity.
+        Converts the current Topic instance into a string that is compliant with the Ditto specification.
 
-        :return:
+        :returns: A string representation of the Topic instance compliant with the Ditto specification.
+        :rtype: str
         """
         topic = Topic.__topic_format_prefix.format(self.namespace, self.entity_id, self.group)
         if self.group == Topic.GROUP_POLICIES:
@@ -179,9 +227,13 @@ class Topic(object):
 
     def from_string(self, topic_string) -> 'Topic':
         """
+        Sets the Topic's properties from a provided string.
 
-        :param topic_string:
-        :return:
+        :param topic_string: A string that is compliant with the Ditto specification.
+            Has the following structure: <namespace>/<entity-name>/<group>/<channel>/<criterion>/<action>
+        :type topic_string: str
+        :returns: The initialized Topic instance with the provided properties.
+        :rtype: Topic
         """
         elements = topic_string.split(sep="/", maxsplit=5)
         self.namespace = elements[0]
@@ -199,4 +251,3 @@ class Topic(object):
         if __index < len(elements):  # action is optional
             self.action = TopicAction(elements[__index])
         return self
-

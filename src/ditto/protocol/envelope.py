@@ -52,16 +52,29 @@ class Envelope(object):
                  revision: int = None,
                  timestamp: str = None):
         """
+        Initializes a new Envelope instance with the provided properties according to the Ditto specification.
 
-        :param topic:
-        :param headers:
-        :param path:
-        :param value:
-        :param fields:
-        :param extra:
-        :param status:
-        :param revision:
-        :param timestamp:
+        :param topic: Used for addressing an entity, defining the channel (twin/live) and specifying the intention of
+            the Protocol message.
+        :type topic: Topic
+        :param headers: Represents all Ditto-specific headers along with additional HTTP/etc.
+            See https://www.eclipse.org/ditto/protocol-specification.html
+        :type headers: Headers
+        :param path: References a part of a Thing which is affected by this message.
+        :type path: str
+        :param value: The JSON value to apply at the specified path.
+        :type value: typing.Any
+        :param fields: The fields that should be included in the response.
+        :type fields: str
+        :param extra: The extra object contains the extraFields which have optionally been selected to be
+            included when using signal enrichment. (See https://www.eclipse.org/ditto/2.0/basic-enrichment.html)
+        :type extra: typing.Any
+        :param status: Some protocol messages (for example responses) contain a HTTP status code which is stored in this field.
+        :type status: int
+        :param revision: For events this field contains the revision number of the event.
+        :type revision: int
+        :param timestamp: For events this field contains the modification timestamp of the event.
+        :type timestamp: str
         """
         self.topic = topic
         self.headers = headers
@@ -77,98 +90,125 @@ class Envelope(object):
 
     def with_topic(self, topic: Topic) -> 'Envelope':
         """
-        Configures the topic of the Envelope.
+        Sets the topic of the current Envelope instance to the provided Topic instance.
 
-        :param topic:
-        :return:
+        :param topic: A path that specifies the address of the entity and the intention of the message.
+        :type topic: Topic
+        :returns: The updated Envelope instance with the provided topic.
+        :rtype: Envelope
         """
         self.topic = topic
         return self
 
     def with_headers(self, headers: Headers) -> 'Envelope':
         """
-        Configures the headers of the Envelope.
+        Sets the headers of the current Envelope instance to the provided Headers instance.
 
-        :param headers:
-        :return:
+        :param headers: Protocol messages contain headers as JSON object with arbitrary content.
+            See https://www.eclipse.org/ditto/protocol-specification.html.
+        :type headers: Headers
+        :returns: The updated Envelope instance with the provided headers.
+        :rtype: Envelope
         """
         self.headers = headers
         return self
 
     def with_path(self, path: str) -> 'Envelope':
         """
-        Configures the Ditto path of the Envelope.
+        Sets the path of the current Envelope instance to the provided string.
 
-        :param path:
-        :return:
+        :param path: Contains a JSON pointer of where to apply the value of the protocol message.
+            May also be / when the value contains a replacement for the complete addressed entity.
+        :type path: str
+        :returns: The updated Envelope instance with the provided path.
+        :rtype: Envelope
         """
         self.path = path
         return self
 
     def with_value(self, value: Any) -> 'Envelope':
         """
-        Configures the Ditto value of the Envelope.
+        Sets the value of the current Envelope instance to the provided JSON value.
 
-        :param value:
-        :return:
+        :param value: The JSON value to apply at the message's specified path.
+        :type value:typing.Any
+        :returns: The updated Envelope instance with the provided value.
+        :rtype: Envelope
         """
         self.value = value
         return self
 
     def with_fields(self, fields: str) -> 'Envelope':
         """
-        Configures the fields of the Envelope as defined by the Ditto protocol specification.
+        Sets the fields of the current Envelope instance to the provided string.
 
-        :param fields:
-        :return:
+        :param fields: The fields that should be included in the response.
+        :type fields: str
+        :returns: The updated Envelope instance with the provided fields.
+        :rtype: Envelope
         """
         self.fields = fields
         return self
 
     def with_extra(self, extra: Any) -> 'Envelope':
         """
-        Configures any extra Envelope configurations as defined by the Ditto protocol specification.
+        Sets the extra field of the current Envelope instance to the provided JSON value.
 
-        :param extra:
-        :return:
+        :param extra: The extra object contains the extraFields which have optionally been selected to be
+            included when using signal enrichment. Events, for example, only contain the actually changed data by
+            default, so it is often helpful to additionally include some extra fields as context to be included
+            when subscribing.
+        :type extra: typing.Any
+        :returns: The updated Envelope instance with the provided extra.
+        :rtype: Envelope
         """
         self.extra = extra
         return self
 
     def with_status(self, status: int) -> 'Envelope':
         """
-        Configures the status of the Envelope based on the HTTP codes available.
+        Sets the status of the current Envelope instance to the provided integer.
 
-        :param status:
-        :return:
+        :param status: Some protocol messages (for example responses) contain a HTTP status code which is stored in this field.
+        :type status: int
+        :returns: The updated Envelope instance with the provided status.
+        :rtype: Envelope
         """
         self.status = status
         return self
 
     def with_revision(self, revision: int) -> 'Envelope':
         """
-        Configures the current revision number of an entity this Envelope refers to.
+        Sets the revision of the current Envelope instance to the provided integer.
 
-        :param revision:
-        :return:
+        :param revision: For events this field contains the revision number of the event.
+        :type revision: int
+        :returns: The updated Envelope instance with the provided revision.
+        :rtype: Envelope
         """
         self.revision = revision
         return self
 
     def with_timestamp(self, timestamp: str) -> 'Envelope':
         """
-        Configures the timestamp of the Envelope.
+        Sets the timestamp of the current Envelope instance to the provided string.
 
-        :param timestamp:
-        :return:
+        :param timestamp: For events this field contains the modification timestamp of the event.
+        :type timestamp: str
+        :returns: The updated Envelope instance with the provided timestamp.
+        :rtype: Envelope
         """
         self.timestamp = timestamp
         return self
 
     def to_ditto_dict(self) -> Dict[str, Any]:
         """
+        Converts the current Envelope instance into a dictionary
+        that is compliant with the Ditto specification and is directly JSON serializable
+        compliant with the Ditto format requirements.
 
-        :return:
+        :returns: A dictionary representation of the Envelope instance compliant with the Ditto JSON format.
+        :rtype: dict
         """
         envelope_dict = {
             Envelope.__ditto_json_key_topic: self.topic.__str__()
@@ -188,9 +228,15 @@ class Envelope(object):
 
     def from_ditto_dict(self, ditto_dictionary: Dict):
         """
+        Enables initialization of the Envelope instance via a dictionary that is compliant with the Ditto specification.
 
-        :param ditto_dictionary:
-        :return:
+        This method can be used in combination with the supported by Python object_hook configuration for loading JSON data.
+
+        :param ditto_dictionary: The dictionary that is compliant with the Ditto specification.
+        :type ditto_dictionary: typing.Dict
+        :returns: The initialized Envelope instance if the dictionary is compliant with the Ditto specification.
+            Otherwise, the input ditto_dictionary is returned.
+        :rtype: Envelope
         """
         if (list(set(ditto_dictionary.keys()) & set(
                 Envelope.__ditto_json_keys_all))) and Envelope.__ditto_json_key_topic in ditto_dictionary.keys():
