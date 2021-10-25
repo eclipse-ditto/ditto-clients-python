@@ -34,13 +34,15 @@ class Feature(object):
                  properties: Dict[str, Any] = None,
                  desired_properties: Dict[str, Any] = None):
         """
-        Initializes a new Feature instance with the provided definition, properties and desired properties
-        according to the Ditto specification.
+        Initializes a new Feature instance with the provided properties according to the Ditto specification.
 
         :param definition: The list of DefinitionIDs that this Feature implementation will provide the support for.
+        :type definition: DefinitionID
         :param properties: The dictionary of properties related to the DefinitionIDs and additional if needed.
+        :type properties: typing.Dict[str, Any]
         :param desired_properties: The dictionary of desired properties that are to be configured
-        as the currently desired state of the Feature.
+            as the currently desired state of the Feature.
+        :type desired_properties: typing.Dict[str, Any]
         """
         self.definition = definition
         self.properties = properties
@@ -52,12 +54,15 @@ class Feature(object):
 
     def with_definition_from(self, *args: str) -> 'Feature':
         """
-         An auxiliary method to set the Feature's definition.
+        An auxiliary method to set the Feature's definition.
 
         It is generated from an array of strings converted into the proper DefinitionID instances.
 
-        :param args: the string DefinitionID representations to generate the objects from in the format <namespace:name:version>
-        :return: The Feature object initialized with the provided list of definition IDs set as definition.
+        :param args: the string DefinitionID representations to generate the objects from in the format
+            <namespace>:<name>:<version>
+        :type args: str
+        :returns: The Feature object initialized with the provided list of definition IDs set as definition.
+        :rtype: Feature
         """
         self.definition = [DefinitionID().from_string(arg) for arg in args]
         return self
@@ -67,7 +72,9 @@ class Feature(object):
         Sets the definition of the current Feature instance to the provided set of DefinitionIDs.
 
         :param args: The list of DefinitionIDs to set.
-        :return: The Feature object initialized with the provided list of DefinitionIDs.
+        :type args: DefinitionID
+        :returns: The Feature object initialized with the provided list of DefinitionIDs.
+        :rtype: Feature
         """
         self.definition = args
         return self
@@ -87,7 +94,9 @@ class Feature(object):
         - new keys and their values are added directly
 
         :param kwargs: The dictionary of properties to be included in the current Feature instance.
-        :return: The updated Feature instance with the provided properties.
+        :type kwargs: typing.Any
+        :returns: The updated Feature instance with the provided properties.
+        :rtype: Feature
         """
         self.properties.update(**kwargs)
         return self
@@ -105,8 +114,11 @@ class Feature(object):
         dict, list, tuple, str, int, float, bool, None.
 
         :param property_id: The ID of the top-level property to add/set.
+        :type property_id: str
         :param value: The vale of the property to add/set.
-        :return: The updated Feature instance with the provided property.
+        :type value: typing.Any
+        :returns: The updated Feature instance with the provided property.
+        :rtype: Feature
         """
         self.properties[property_id] = value
         return self
@@ -126,7 +138,9 @@ class Feature(object):
         - new keys and their values are added directly
 
         :param kwargs: The dictionary of desired properties to be included in the current Feature instance.
-        :return: The updated Feature instance with the provided desired properties.
+        :type kwargs: typing.Any
+        :returns: The updated Feature instance with the provided desired properties.
+        :rtype: Feature
         """
         self.desired_properties.update(**kwargs)
         return self
@@ -142,8 +156,11 @@ class Feature(object):
         dict, list, tuple, str, int, float, bool, None.
 
         :param desired_property_id: The ID of the top-level desired property to add/set.
-        :param value: The vale of the desired property to add/set.
-        :return: The updated Feature instance with the provided desired property.
+        :type desired_property_id: str
+        :param value: The value of the desired property to add/set.
+        :type value: typing.Any
+        :returns: The updated Feature instance with the provided desired property.
+        :rtype: Feature
         """
         self.desired_properties[desired_property_id] = value
         return self
@@ -159,7 +176,8 @@ class Feature(object):
         - creating a new Feature
         - modifying an existing Feature
 
-        :return: A dictionary representation of the Feature instance compliant with the Ditto JSON format.
+        :returns: A dictionary representation of the Feature instance compliant with the Ditto JSON format.
+        :rtype: typing.Dict
         """
         feature_dict = {}
         if self.definition:
@@ -170,13 +188,15 @@ class Feature(object):
 
     def from_ditto_dict(self, ditto_dictionary: Dict[str, Any]):
         """
-        Enables initialization of the Feature instance via a dictionary representing a Ditto JSON formatted feature.
+        Enables initialization of the Feature instance via a dictionary that is compliant with the Ditto specification.
 
         This method can be used in combination with the supported by Python object_hook configuration for loading JSON data.
 
-        :param ditto_dictionary: The dictionary that is a direct Ditto JSON representation of a feature.
-        :return: The initialized Feature instance if the dictionary is a direct Ditto JSON representation of a featured.
-        Otherwise, the input ditto_dictionary is returned.
+        :param ditto_dictionary: The dictionary that is compliant with the Ditto specification.
+        :type ditto_dictionary: typing.Dict
+        :returns: The initialized Feature instance if the dictionary is compliant with the Ditto specification.
+            Otherwise, the input ditto_dictionary is returned.
+        :rtype: Feature
         """
         if list(set(ditto_dictionary.keys()) & set(Feature.__ditto_json_keys_all)):
             if Feature.__ditto_json_key_definition in ditto_dictionary:

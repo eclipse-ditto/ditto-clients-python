@@ -54,6 +54,38 @@ class Thing(object):
                  created: str = None,
                  modified: str = None,
                  metadata: Any = None):
+        """
+        Initializes a new Thing instance with the provided properties according to the Ditto specification.
+
+        :param thing_id: Unique identifier of a Thing. For choosing custom Thing IDs when creating a Thing.
+            The rules for namespaced IDs apply.
+        :type thing_id: NamespacedID
+        :param policy_id: Links to the ID of an existing Policy which contains the authorization information applied for this Thing.
+            The policy ID has to conform to the namespaced entity ID notation.
+        :type policy_id: NamespacedID
+        :param definition: The definition of this Thing declaring its model in the form 'namespace:name:version'.
+        :type definition: DefinitionID
+        :param attributes: The Attributes that describe this Thing in more detail. Can be an arbitrary JSON object.
+            Attributes are typically used to model rather static properties at the Thing level.
+            Static means that the values do not change as frequently as property values of Features.
+        :type attributes: typing.Dict[str, typing.Any]
+        :param features: The Features belonging to this Thing. A Thing can handle any number of Features.
+            The key of this object represents the Feature's ID. Due to the fact that a Feature's ID often needs to be set
+            in the path of a HTTP request, it is strongly recommended to use a restricted set of characters.
+        :type features: typing.Dict[str, Feature]
+        :param revision: The revision is a counter which is incremented on each modification of a Thing.
+        :type revision: int
+        :param created: The created timestamp of the Thing in ISO-8601 UTC format. The timestamp is set on creation.
+        :type created: str
+        :param modified: The modified timestamp of the Thing in ISO-8601 UTC format.
+            The timestamp is set on each modification.
+        :type modified: str
+        :param metadata: The Metadata of the Thing. This field is not returned by default but must be selected explicitly.
+            The content is a JSON object having the Thing's JSON structure with the difference that the JSON leaves
+            of the Thing are JSON objects containing the metadata.
+        :type metadata: typing.Any
+        
+        """
         self.thing_id = thing_id
         self.policy_id = policy_id
         self.definition = definition
@@ -76,8 +108,11 @@ class Thing(object):
         """
         Sets the provided NamespacedID as the current Thing's instance ID value.
 
-        :param thing_id:
-        :return:
+        :param thing_id: Unique identifier of a Thing. For choosing custom Thing IDs when creating a Thing.
+            The rules for namespaced IDs apply.
+        :type thing_id: NamespacedID
+        :returns: The updated Thing instance with the provided thing_id.
+        :rtype: Thing
         """
         self.thing_id = thing_id
         return self
@@ -86,8 +121,11 @@ class Thing(object):
         """
         An auxiliary method that sets the ID value of the current Thing instance based on the provided string n the form of 'namespace:name'.
 
-        :param thing_id_str:
-        :return:
+        :param thing_id_str: Unique identifier of a Thing. For choosing custom Thing IDs when creating a Thing.
+            The rules for namespaced IDs apply.
+        :type thing_id_str: str
+        :returns: The updated Thing instance with the provided thing_id.
+        :rtype: Thing
         """
         self.thing_id = NamespacedID().from_string(thing_id_str)
         return self
@@ -96,8 +134,11 @@ class Thing(object):
         """
         Sets the provided Policy ID to the current Thing instance.
 
-        :param policy_id:
-        :return:
+        :param policy_id: Links to the ID of an existing Policy which contains the authorization information applied for this Thing.
+            The policy ID has to conform to the namespaced entity ID notation.
+        :type policy_id: NamespacedID
+        :returns: The updated Thing instance with the provided policy_id.
+        :rtype: Thing
         """
         self.policy_id = policy_id
         return self
@@ -106,8 +147,11 @@ class Thing(object):
         """
         An auxiliary method that sets the Policy ID of the current Thing instance.
 
-        :param policy_id_str:
-        :return:
+        :param policy_id_str: Links to the ID of an existing Policy which contains the authorization information applied for this Thing.
+            The policy ID has to conform to the namespaced entity ID notation.
+        :type policy_id_str: str
+        :returns: The updated Thing instance with the provided policy_id.
+        :rtype: Thing
         """
         self.policy_id = NamespacedID.from_string(policy_id_str)
         return self
@@ -116,8 +160,10 @@ class Thing(object):
         """
         Sets the current Thing instance's definition to the provided value.
 
-        :param definition_id:
-        :return:
+        :param definition_id: The definition of this Thing declaring its model in the form 'namespace:name:version'.
+        :type definition_id: DefinitionID
+        :returns: The updated Thing instance with the provided definition.
+        :rtype: Thing
         """
         self.definition = definition_id
         return self
@@ -126,8 +172,10 @@ class Thing(object):
         """
         An auxiliary method to set the current Thing instance's definition to the provided one in the form of 'namespace:name:version'.
 
-        :param definition_id_str:
-        :return:
+        :param definition_id_str: The definition of this Thing declaring its model in the form 'namespace:name:version'.
+        :type definition_id_str: str
+        :returns: The updated Thing instance with the provided definition.
+        :rtype: Thing
         """
         self.definition = DefinitionID().from_string(definition_id_str)
         return self
@@ -136,8 +184,12 @@ class Thing(object):
         """
         Sets all attributes to the current Thing instance.
 
-        :param kwargs:
-        :return:
+        :param kwargs: The Attributes that describe this Thing in more detail. Can be an arbitrary JSON object.
+            Attributes are typically used to model rather static properties at the Thing level.
+            Static means that the values do not change as frequently as property values of Features.
+        :type kwargs: typing.Any
+        :returns: The updated Thing instance with the provided attributes.
+        :rtype: Thing
         """
         self.attributes.update(**kwargs)
         return self
@@ -146,9 +198,12 @@ class Thing(object):
         """
         Sets/add an attribute to the current Thing instance.
 
-        :param attribute_id:
-        :param attribute_value:
-        :return:
+        :param attribute_id: The ID of the desired attribute to add/set.
+        :type attribute_id: str
+        :param attribute_value: The value of the desired attribute to add/set.
+        :type attribute_value: typing.Any
+        :returns: The updated Thing instance with the provided desired attribute.
+        :rtype: Thing
         """
         self.attributes[attribute_id] = attribute_value
         return self
@@ -157,8 +212,12 @@ class Thing(object):
         """
         Sets all features to the current Thing instance.
 
-        :param kwargs:
-        :return:
+        :param features: The Features belonging to this Thing. A Thing can handle any number of Features.
+            The key of this object represents the Feature's ID. Due to the fact that a Feature's ID often needs to be set
+            in the path of a HTTP request, it is strongly recommended to use a restricted set of characters.
+        :type kwargs: Feature
+        :returns: The updated Thing instance with the provided features.
+        :rtype: Thing
         """
         self.features.update(**kwargs)
         return self
@@ -167,17 +226,29 @@ class Thing(object):
         """
         Sets/adds a Feature to the current features set of the Thing instance.
 
-        :param feature_id:
-        :param feature:
-        :return:
+        :param feature_id: The ID of the desired feature to add/set.
+        :type feature_id: str
+        :param feature: The value of the desired feature to add/set.
+        :type feature: Feature
+        :returns: The updated Thing instance with the provided features.
+        :rtype: Thing
         """
         self.features[feature_id] = feature
         return self
 
     def to_ditto_dict(self) -> Dict[str, Any]:
         """
+        Converts the current Thing instance into a dictionary
+        that is compliant with the Ditto specification and is directly JSON serializable
+        compliant with the Ditto format requirements.
 
-        :return:
+        This method is intended to be used in the cases where a Thing is needed to be provided
+        as a payload of a Ditto message (i.e. Envelope's value), e.g.:
+        - creating a new Thing
+        - modifying an existing Thing
+
+        :returns: A dictionary representation of the Thing instance compliant with the Ditto JSON format.
+        :rtype: typing.Dict
         """
         thing_dict = {}
         if self.thing_id:
@@ -199,9 +270,15 @@ class Thing(object):
 
     def from_ditto_dict(self, ditto_dictionary: Dict[str, Any]):
         """
+        Enables initialization of the Thing instance via a dictionary that is compliant with the Ditto specification.
 
-        :param ditto_dictionary:
-        :return:
+        This method can be used in combination with the supported by Python object_hook configuration for loading JSON data.
+
+        :param ditto_dictionary: The dictionary that is compliant with the Ditto specification.
+        :type ditto_dictionary: typing.Dict
+        :returns: The initialized Thing instance if the dictionary is compliant with the Ditto specification.
+            Otherwise, the input ditto_dictionary is returned.
+        :rtype: Thing
         """
         if list(set(ditto_dictionary.keys()) & set(Thing.__ditto_json_keys_all)):
             if Thing.__ditto_json_key_thing_id in ditto_dictionary:

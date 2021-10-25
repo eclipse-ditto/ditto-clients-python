@@ -23,8 +23,10 @@ class NamespacedID(object):
                  name=None):
         """
 
-        :param namespace:
-        :param name:
+        :param namespace: The entity’s namespace in which the entity is located.
+        :type namespace: str
+        :param name: The entity's name. May not be empty, contain "/" or contain control characters.
+        :type name: str
         """
         self.namespace = namespace
         self.name = name
@@ -32,8 +34,10 @@ class NamespacedID(object):
     def with_namespace(self, namespace: str) -> 'NamespacedID':
         """
 
-        :param namespace:
-        :return:
+        :param namespace: The entity’s namespace in which the entity is located.
+        :type namespace: str
+        :returns: The updated NamespacedID instance with the provided namespace.
+        :rtype: NamespacedID
         """
         self.namespace = namespace
         return self
@@ -41,17 +45,22 @@ class NamespacedID(object):
     def with_name(self, name: str) -> 'NamespacedID':
         """
 
-        :param name:
-        :return:
+        :param name: The entity's name. May not be empty, contain "/" or contain control characters.
+        :type name: str
+        :returns: The updated NamespacedID instance with the provided name.
+        :rtype: NamespacedID
         """
         self.name = name
         return self
 
     def from_string(self, namespaced_id_str: str = None) -> 'NamespacedID':
         """
+        Sets the NamespacedID's properties from a provided string.
 
-        :param namespaced_id_str:
-        :return:
+        :param namespaced_id_str: A string that is compliant with the Ditto specification.
+            It consists of a namespace and a name in the form of <namespace>:<name>.
+        :returns: The initialized NamespacedID instance with the provided name and namespace.
+        :rtype: NamespacedID
         """
         if namespaced_id_str:
             elements = namespaced_id_str.split(sep=":", maxsplit=1)
@@ -59,4 +68,9 @@ class NamespacedID(object):
         return self
 
     def __str__(self):
+        """
+        Converts the current NamespacedID instance into a string that is compliant with the Ditto specification.
+        :returns: A string representation of the NamespacedID instance compliant with the Ditto specification.
+        :rtype: str
+        """
         return self.__namespaced_id_template.format(self.namespace, self.name)
