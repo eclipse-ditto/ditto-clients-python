@@ -251,3 +251,4 @@ class Event(_Signal):
         :rtype: Event
         """
         self.topic.with_channel(Topic.CHANNEL_TWIN)
+        return self
