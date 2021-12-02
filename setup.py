@@ -23,7 +23,7 @@ setup(
     long_description=readme,
     long_description_content_type='text/markdown',
     author='Gabriela Yoncheva, Ognian Baruh',
-    author_email='external.Gabriela.Yoncheva@bosch.io, external.Ognian.Baruh@bosch.io',
+    author_email='fixed-term.Gabriela.Yoncheva@bosch.io, fixed-term.Ognyan.Baruh@bosch.io',
     url='https://eclipse.org/ditto/',
     package_dir={'': 'src'},
     packages=find_packages(where='src'),

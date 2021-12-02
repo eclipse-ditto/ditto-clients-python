@@ -79,8 +79,6 @@ class Feature(object):
         self.definition = args
         return self
 
-    #
-
     def with_properties(self, **kwargs: Any) -> 'Feature':
         """
         Sets all properties of the current Feature instance.
@@ -101,8 +99,6 @@ class Feature(object):
         self.properties.update(**kwargs)
         return self
 
-    # with_property
-
     def with_property(self, property_id: str, value: Any) -> 'Feature':
         """
         Sets/adds a property to the current Feature instance.
@@ -122,8 +118,6 @@ class Feature(object):
         """
         self.properties[property_id] = value
         return self
-
-    # with_desired_properties
 
     def with_desired_properties(self, **kwargs: Any) -> 'Feature':
         """
