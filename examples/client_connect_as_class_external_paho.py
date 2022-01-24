@@ -40,7 +40,7 @@ class MyClient(Client):
         live_message = Message(incoming_thing_id).outbox("testCommand").with_payload(
             dict(a="b", x=2))
         # generate the respective Envelope
-        response_envelope = live_message.envelope(correlation_id=message.headers.correlation_id, response_required=False).with_status(204)
+        response_envelope = live_message.envelope(correlation_id=message.headers.correlation_id, response_required=False).with_status(200)
         # send the reply
         self.reply(request_id, response_envelope)
 

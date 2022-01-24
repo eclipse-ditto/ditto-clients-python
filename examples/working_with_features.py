@@ -9,68 +9,70 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 
-from base64 import encode
-import time, sys
-
 from ditto.client import Client
+from ditto.model.definition_id import DefinitionID
 from ditto.model.feature import Feature
 from ditto.model.namespaced_id import NamespacedID
-from ditto.model.thing import Thing
-from ditto.protocol.envelope import Envelope
 from ditto.protocol.things.commands import Command
 
+thing_id = NamespacedID().from_string("test.ns:test-name")
+feature_id = "MyFeatureID"
+property_id = "myProperty"
+definition_id = DefinitionID().from_string("my.model.namespace:FeatureModel:1.0.0")
 
-client = Client()
-client.connect("localhost")
 
 def create_or_modify_feature(client):
-       
     # Define the feature to be created or how you want it to be after modification
     # You can provide a semantic definition of your feature
-    myFeature = Feature().with_definition_from("my.model.namespace:FeatureModel:1.0.0").with_property("myProperty", "myValue")
-    
+    my_feature = Feature().with_definition(definition_id).with_property(property_id, "myValue")
+
     # Create your Ditto command. Modify acts as an upsert - it either updates or creates features.
-    command = Command(NamespacedID().from_string("test.ns:test-name")).feature("myFeatureID").twin().modify(myFeature)
+    command = Command(thing_id).feature(feature_id).twin().modify(my_feature)
 
     # Send the Ditto command.
     envelope = command.envelope(response_required=False)
 
     client.send(envelope)
-    
-def create_or_modify_feature_property(client):
 
+
+def create_or_modify_feature_property(client):
     # Create your Ditto command. Modify acts as an upsert - it either updates or creates feature properties.
-    command = Command(NamespacedID().from_string("test.ns:test-name")).feature_property("myFeatureID", "myProperty").twin().modify("myModifiedValue")
+    command = Command(thing_id).feature_property(feature_id, property_id).twin().modify("myModifiedValue")
 
     # Send the Ditto command.
     envelope = command.envelope(response_required=False)
 
-    client.send(envelope)    
+    client.send(envelope)
+
 
 def delete_feature(client):
-
     # Create your Ditto command. Delete can be used to delete either a feature's properties or the feature itself.
-    command = Command(NamespacedID().from_string("test.ns:test-name")).feature("myFeatureID").twin().delete()
+    command = Command(thing_id).feature(feature_id).twin().delete()
 
     # Send the Ditto command.
     envelope = command.envelope(response_required=False)
 
-    client.send(envelope)  
+    client.send(envelope)
+
 
 def delete_feature_property(client):
-
     # Create your Ditto command. Delete can be used to delete either a feature's properties or the feature itself.
-    command = Command(NamespacedID().from_string("test.ns:test-name")).feature_property("myFeatureID", "myProperty").twin().delete()
+    command = Command(thing_id).feature_property(feature_id, property_id).twin().delete()
 
     # Send the Ditto command.
     envelope = command.envelope(response_required=False)
 
-    client.send(envelope)  
+    client.send(envelope)
 
-# Test feature modifiation actions
-create_or_modify_feature(client)
-create_or_modify_feature_property(client)
-delete_feature(client)
-delete_feature_property(client)
 
-client.disconnect()
+def on_connect(cl: Client):
+    create_or_modify_feature(cl)
+    create_or_modify_feature_property(cl)
+    delete_feature_property(cl)
+    delete_feature(cl)
+
+
+# Test feature modification actions
+ditto_client = Client(on_connect=on_connect)
+ditto_client.connect("localhost")
+ditto_client.disconnect()
