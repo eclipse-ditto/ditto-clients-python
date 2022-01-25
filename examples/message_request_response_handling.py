@@ -32,8 +32,8 @@ message_subject = "some-command"
 
 
 def send_inbox_message():
-    live_message = Message(thing_id).inbox(subject=message_subject).with_payload("some_payload")
-    live_message_envelope = live_message.envelope(response_required=True)
+    live_message = Message(thing_id).inbox(message_subject).with_payload("some_payload")
+    live_message_envelope = live_message.envelope(response_required=True, correlation_id="example-correlation-id")
     live_message_dict = live_message_envelope.to_ditto_dict()
     live_message_json = json.dumps(live_message_dict)
     # wait before sending the message to make sure the client's on connect has been executed
