@@ -11,6 +11,7 @@
 import json
 import sys
 import threading
+import time
 
 import paho.mqtt.client as mqtt
 from ditto.client import Client
@@ -19,7 +20,6 @@ from ditto.protocol.envelope import Envelope
 from ditto.protocol.things.messages import Message
 from ditto.model.feature import Feature
 from ditto.model.definition_id import DefinitionID
-
 
 thing_id = NamespacedID().from_string("test.ns:test-name")
 
@@ -36,6 +36,8 @@ def send_inbox_message():
     live_message_envelope = live_message.envelope(response_required=True)
     live_message_dict = live_message_envelope.to_ditto_dict()
     live_message_json = json.dumps(live_message_dict)
+    # wait before sending the message to make sure the client's on connect has been executed
+    time.sleep(5)
     paho_client.publish(topic=req_topic + message_subject, payload=live_message_json)
 
 
@@ -61,7 +63,8 @@ class MyClient(Client):
         live_message = Message(incoming_thing_id).outbox(message_subject).with_payload(
             dict(a="b", x=2))
         # generate the respective Envelope
-        response_envelope = live_message.envelope(correlation_id=message.headers.correlation_id, response_required=False).with_status(200)
+        response_envelope = live_message.envelope(correlation_id=message.headers.correlation_id,
+                                                  response_required=False).with_status(200)
         # send the reply
         self.reply(request_id, response_envelope)
 
