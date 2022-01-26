@@ -46,8 +46,7 @@ class MyClient(Client):
         print("Ditto client connected")
         self.subscribe(self.on_message)
         print("subscribed")
-        inbox_message_thread = threading.Thread(target=send_inbox_message)
-        inbox_message_thread.start()
+
 
     def on_disconnect(self, ditto_client: Client):
         print("Ditto client disconnected")
@@ -86,6 +85,8 @@ try:
     paho_client = mqtt.Client()
     paho_client.on_connect = paho_on_connect
     paho_client.connect("localhost")
+    inbox_message_thread = threading.Thread(target=send_inbox_message)
+    inbox_message_thread.start()
     paho_client.loop_forever()
 except KeyboardInterrupt:
     print("finished")
