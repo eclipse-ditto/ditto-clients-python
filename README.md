@@ -5,3 +5,312 @@
 
 This repository contains the Python client SDK for [Eclipse Ditto](https://eclipse.org/ditto/).
 
+## Table of Contents
+* [Installation](#Installation)
+* [Creating and connecting a client](#Creating-and-connecting-a-client)
+  * [Creating a client instance as a class](#Creating-a-client-instance-as-a-class)
+  * [Connecting an external paho client](#Connecting-an-external-paho-client)
+* [Working with features](#Working-with-features)
+  * [Creating a new feature instance](#Creating-a-new-feature-instance)
+  * [Modifying a feature's property](#Modifying-a-feature's-property)
+  * [Deleting a feature's property](#Deleting-a-feature's-property)
+  * [Deleting a feature](#Deleting-a-feature)
+* [Subscribing and handling messages](#Subscribing-and-handling-messages)
+* [Logging](#Logging)
+
+## Installation
+
+Install the sources and execute the following command:
+
+```commandline
+make install
+```
+
+## Creating and connecting a client
+
+Each client instance can optionally have a defined behaviour after connecting to or disconnecting from the client.
+
+```python    
+def on_connect(ditto_client: Client):
+    print("Ditto client connected")
+
+def on_disconnect(ditto_client: Client):
+    print("Ditto client disconnected")
+```
+
+With these configurations a client instance can be created.
+
+```python
+client = Client(on_connect=on_connect, on_disconnect=on_disconnect)
+```
+
+After the client is created, it's ready to be connected.
+
+```python
+client.connect("localhost")
+while True:
+    try:
+        time.sleep(5)
+    except KeyboardInterrupt:
+        print("finished")
+        client.disconnect()
+        sys.exit()
+```
+
+Full example of the basic client connection can be found [here](examples/client_connect.py).
+
+### Creating a client instance as a class
+
+The client can be created by inheriting the Client class. The `on_connect` and `on_disconnect` callback methods are overridden in order to be configured. A separate method is created in order to connect the client.
+
+```python
+class MyClient(Client):
+    def on_connect(self, ditto_client: Client):
+        print("Ditto client connected")
+
+    def on_disconnect(self, ditto_client: Client):
+        print("Ditto client disconnected")
+
+    def run(self):
+        self.connect("localhost", 1883)
+        while True:
+            try:
+                time.sleep(5)
+            except KeyboardInterrupt:
+                print("finished")
+                self.disconnect()
+                sys.exit()
+```
+
+After the client class is created, an instance of `MyClient` can be created and connected
+
+```python
+ditto_client = MyClient()
+ditto_client.run()
+```
+
+Full example of the client connection as a class can be found [here](examples/client_connect_as_class.py).
+
+### Connecting an external paho client
+
+It is also possible to create a client instance using external paho client, which allows adding custom topics and messages that are not supported in Ditto.
+
+A custom client class is created by inheriting the Client class.
+
+```python
+class MyClient(Client):
+    def on_connect(self, ditto_client: Client):
+        print("Ditto client connected")
+        self.subscribe(self.on_message)
+
+    def on_disconnect(self, ditto_client: Client):
+        print("Ditto client disconnected")
+        self.unsubscribe(self.on_message)
+
+    def on_message(self, request_id: str, message: Envelope):
+        print("request_id: {}, envelope: {}".format(request_id, message.to_ditto_dict()))
+
+    def on_log(self, ditto_client: Client, level, string):
+        print("[{}] {}".format(level, string))
+```
+
+Then a custom paho `on_connect()` callback method can be created. It will create an instance of MyClient, providing the connected external paho client.
+
+```python
+ditto_client: Client = None
+
+def paho_on_connect(client, userdata, flags, rc):
+    global ditto_client
+    ditto_client = MyClient(paho_client=client)
+    ditto_client.enable_logger(True)
+    ditto_client.connect()
+```
+
+Finally, the paho client can be connected. 
+
+```python
+try:
+    paho_client = mqtt.Client()
+    paho_client.on_connect = paho_on_connect
+    paho_client.connect("localhost")
+    paho_client.loop_forever()
+except KeyboardInterrupt:
+    print("finished")
+    ditto_client.disconnect()
+    paho_client.disconnect()
+    sys.exit()
+```
+
+**_NOTE:_** Both the Ditto client and the external paho client must be disconnected before terminating the program.
+
+Full example of the client connection using an external paho client can be found [here](examples/client_connect_as_class_external_paho.py).
+
+## Working with features
+
+Before sending any commands regarding features, there must be a client connected.
+
+### Creating a new feature instance
+
+A feature instance can be created with definition ID, properties, and/or desired properties.
+
+```python
+myFeature = Feature()
+    .with_definition_from("my.model.namespace:FeatureModel:1.0.0")
+    .with_property("myProperty", "myValue")
+```
+
+Then a Ditto command can be created. Modify acts as an upsert - it either creates a feature or updates it if it already exists.
+The ID provided in `feature()` is used to recognize the feature which will be created/updated. 
+
+```python
+command = Command(NamespacedID().from_string("test.ns:test-name"))
+    .feature("myFeatureID")
+    .twin()
+    .modify(myFeature)
+```
+
+The command can be now wrapped in an envelope and sent.
+
+```python
+envelope = command.envelope(response_required=False)
+client.send(envelope)
+```
+
+### Modifying a feature's property
+
+Modify overrides the current feature's property.
+
+```python
+command = Command(NamespacedID().from_string("test.ns:test-name"))
+    .feature_property("myFeatureID", "myProperty")
+    .twin()
+    .modify("myModifiedValue")
+```
+
+The command can be now wrapped in an envelope and sent.
+
+```python
+envelope = command.envelope(response_required=False)
+client.send(envelope) 
+```
+
+### Deleting a feature's property
+
+Delete command is created using the feature's ID and the property's name.
+
+```python
+command = Command(NamespacedID().from_string("test.ns:test-name"))
+    .feature_property("myFeatureID", "myProperty")
+    .twin()
+    .delete()
+```
+
+The command can now be wrapped in an envelope and sent.
+```python
+envelope = command.envelope(response_required=False)
+client.send(envelope) 
+```
+
+### Deleting a feature
+
+A feature can be deleted with a command with the appropriate feature's ID.
+
+```python
+command = Command(NamespacedID().from_string("test.ns:test-name"))
+    .feature("myFeatureID")
+    .twin()
+    .delete()
+```
+
+The command can now be wrapped in an envelope and sent.
+```python
+envelope = command.envelope(response_required=False)
+client.send(envelope) 
+```
+
+Full example of working with features can be found [here](examples/working_with_features.py).
+
+## Subscribing and handling messages
+
+Every client instance can subscribe for incoming Ditto messages. This usually happens right after the client is connected.
+
+```python
+def on_connect(ditto_client: Client):
+    print("Ditto client connected")
+
+    # Subscribe for incoming messages
+    ditto_client.subscribe(on_message)
+```
+
+**_NOTE:_** Multiple handlers can be added for Ditto messages processing.
+
+It is a good practice to clear all subscriptions before disconnecting the client.
+
+```python
+def disconnect(ditto_client: Client):
+    client.unsubscribe()
+    client.disconnect()
+```
+
+**_NOTE:_** If no message handlers are provided to `unsubscribe()` then all will be removed.
+
+Now when a message is received it can be handled and replied to.
+
+```python
+def on_message(request_id: str, message: Envelope):
+    # get the thing id from the topic of the incoming message
+    incoming_thing_id = NamespacedID(message.topic.namespace, message.topic.entity_id)
+
+    # create an example outbox message and reply
+    live_message = Message(incoming_thing_id).outbox(message_subject).with_payload(
+        dict(a="b", x=2))
+    
+    # generate the respective Envelope
+    response_envelope = live_message.envelope(correlation_id=message.headers.correlation_id,
+                                              response_required=False).with_status(200)
+    # send the reply
+    self.reply(request_id, response_envelope)
+```
+
+A message can also be sent from the client. In this case an external paho client is used.
+
+```python
+thing_id = NamespacedID().from_string("test.ns:test-name")
+feature_id = "MyFeatureID"
+property_id = "myProperty"
+definition_id = DefinitionID().from_string("my.model.namespace:FeatureModel:1.0.0")
+my_feature = Feature().with_definition(definition_id).with_property(property_id, "myValue")
+req_topic = "command///req/" + str(thing_id) + "/"
+message_subject = "some-command"
+
+
+def send_inbox_message():
+    # create message and envelope
+    live_message = Message(thing_id).inbox(message_subject).with_payload("some_payload")
+    live_message_envelope = live_message.envelope(response_required=True, correlation_id="example-correlation-id")
+    live_message_dict = live_message_envelope.to_ditto_dict()
+    live_message_json = json.dumps(live_message_dict)
+    
+    # publish message
+    paho_client.publish(topic=req_topic + message_subject, payload=live_message_json)
+```
+
+Full example of the subscribing and handling messages can be found [here](examples/message_request_response_handling.py).
+
+## Logging
+
+The default logger can be used in order to log events, regarding the client.
+
+```python
+client.enable_logger(True)
+```
+
+Alternatively, an external logger can be also provided.
+
+```python
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+client.enable_logger(True, logger)
+```
+
+**_NOTE:_** The logger must be enabled before connecting the client.
