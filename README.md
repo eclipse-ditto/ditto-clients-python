@@ -28,7 +28,7 @@ make install
 
 ## Creating and connecting a client
 
-Each client instance can optionally have a defined behaviour after connecting to or disconnecting from the client.
+It is a good practice to have a defined behaviour after connecting or disconnecting the client.
 
 ```python    
 def on_connect(ditto_client: Client):
@@ -48,45 +48,30 @@ After the client is created, it's ready to be connected.
 
 ```python
 client.connect("localhost")
-while True:
-    try:
-        time.sleep(5)
-    except KeyboardInterrupt:
-        print("finished")
-        client.disconnect()
-        sys.exit()
+```
+
+The client can be also connected with custom connection configurations.
+
+```python
+client.connect("localhost", port=1883, keepalive=60)
 ```
 
 Full example of the basic client connection can be found [here](examples/client_connect.py).
 
 ### Creating a client instance as a class
 
-The client can be created by inheriting the Client class. The `on_connect` and `on_disconnect` callback methods are overridden in order to be configured. A separate method is created in order to connect the client.
+It is possible to create a client instance by inheriting the Client class. The `on_connect` and `on_disconnect` callback methods should be overridden in order to be configured. A separate method can be created in order to connect the client. This allows the client to be connected with custom configurations.
 
 ```python
 class MyClient(Client):
     def on_connect(self, ditto_client: Client):
         print("Ditto client connected")
-
+        
     def on_disconnect(self, ditto_client: Client):
         print("Ditto client disconnected")
-
+        
     def run(self):
-        self.connect("localhost", 1883)
-        while True:
-            try:
-                time.sleep(5)
-            except KeyboardInterrupt:
-                print("finished")
-                self.disconnect()
-                sys.exit()
-```
-
-After the client class is created, an instance of `MyClient` can be created and connected
-
-```python
-ditto_client = MyClient()
-ditto_client.run()
+        self.connect("localhost", port=1883, keepalive=60)
 ```
 
 Full example of the client connection as a class can be found [here](examples/client_connect_as_class.py).
@@ -95,26 +80,9 @@ Full example of the client connection as a class can be found [here](examples/cl
 
 It is also possible to create a client instance using external paho client, which allows adding custom topics and messages that are not supported in Ditto.
 
-A custom client class is created by inheriting the Client class.
+Firstly, a custom `MyClient` class is created by inheriting the Client class.
 
-```python
-class MyClient(Client):
-    def on_connect(self, ditto_client: Client):
-        print("Ditto client connected")
-        self.subscribe(self.on_message)
-
-    def on_disconnect(self, ditto_client: Client):
-        print("Ditto client disconnected")
-        self.unsubscribe(self.on_message)
-
-    def on_message(self, request_id: str, message: Envelope):
-        print("request_id: {}, envelope: {}".format(request_id, message.to_ditto_dict()))
-
-    def on_log(self, ditto_client: Client, level, string):
-        print("[{}] {}".format(level, string))
-```
-
-Then a custom paho `on_connect()` callback method can be created. It will create an instance of MyClient, providing the connected external paho client.
+Then a custom paho `on_connect()` callback method is created. It will create an instance of `MyClient`, providing the connected external paho client.
 
 ```python
 ditto_client: Client = None
@@ -270,29 +238,6 @@ def on_message(request_id: str, message: Envelope):
                                               response_required=False).with_status(200)
     # send the reply
     self.reply(request_id, response_envelope)
-```
-
-A message can also be sent from the client. In this case an external paho client is used.
-
-```python
-thing_id = NamespacedID().from_string("test.ns:test-name")
-feature_id = "MyFeatureID"
-property_id = "myProperty"
-definition_id = DefinitionID().from_string("my.model.namespace:FeatureModel:1.0.0")
-my_feature = Feature().with_definition(definition_id).with_property(property_id, "myValue")
-req_topic = "command///req/" + str(thing_id) + "/"
-message_subject = "some-command"
-
-
-def send_inbox_message():
-    # create message and envelope
-    live_message = Message(thing_id).inbox(message_subject).with_payload("some_payload")
-    live_message_envelope = live_message.envelope(response_required=True, correlation_id="example-correlation-id")
-    live_message_dict = live_message_envelope.to_ditto_dict()
-    live_message_json = json.dumps(live_message_dict)
-    
-    # publish message
-    paho_client.publish(topic=req_topic + message_subject, payload=live_message_json)
 ```
 
 Full example of the subscribing and handling messages can be found [here](examples/message_request_response_handling.py).
