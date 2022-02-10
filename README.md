@@ -8,8 +8,6 @@ This repository contains the Python client SDK for [Eclipse Ditto](https://eclip
 ## Table of Contents
 * [Installation](#Installation)
 * [Creating and connecting a client](#Creating-and-connecting-a-client)
-  * [Creating a client instance as a class](#Creating-a-client-instance-as-a-class)
-  * [Connecting an external paho client](#Connecting-an-external-paho-client)
 * [Working with features](#Working-with-features)
   * [Creating a new feature instance](#Creating-a-new-feature-instance)
   * [Modifying a feature's property](#Modifying-a-feature's-property)
@@ -58,60 +56,9 @@ client.connect("localhost", port=1883, keepalive=60)
 
 Full example of the basic client connection can be found [here](examples/client_connect.py).
 
-### Creating a client instance as a class
+**_NOTE:_** It is possible to create a client instance by inheriting the Client class. The `on_connect` and `on_disconnect` callback methods should be overridden in order to be configured. A separate method can be created in order to connect the client. This allows the client to be connected with custom configurations. Full example of the client connection as a class can be found [here](examples/client_connect_as_class.py).
 
-It is possible to create a client instance by inheriting the Client class. The `on_connect` and `on_disconnect` callback methods should be overridden in order to be configured. A separate method can be created in order to connect the client. This allows the client to be connected with custom configurations.
-
-```python
-class MyClient(Client):
-    def on_connect(self, ditto_client: Client):
-        print("Ditto client connected")
-        
-    def on_disconnect(self, ditto_client: Client):
-        print("Ditto client disconnected")
-        
-    def run(self):
-        self.connect("localhost", port=1883, keepalive=60)
-```
-
-Full example of the client connection as a class can be found [here](examples/client_connect_as_class.py).
-
-### Connecting an external paho client
-
-It is also possible to create a client instance using external paho client, which allows adding custom topics and messages that are not supported in Ditto.
-
-Firstly, a custom `MyClient` class is created by inheriting the Client class.
-
-Then a custom paho `on_connect()` callback method is created. It will create an instance of `MyClient`, providing the connected external paho client.
-
-```python
-ditto_client: Client = None
-
-def paho_on_connect(client, userdata, flags, rc):
-    global ditto_client
-    ditto_client = MyClient(paho_client=client)
-    ditto_client.enable_logger(True)
-    ditto_client.connect()
-```
-
-Finally, the paho client can be connected. 
-
-```python
-try:
-    paho_client = mqtt.Client()
-    paho_client.on_connect = paho_on_connect
-    paho_client.connect("localhost")
-    paho_client.loop_forever()
-except KeyboardInterrupt:
-    print("finished")
-    ditto_client.disconnect()
-    paho_client.disconnect()
-    sys.exit()
-```
-
-**_NOTE:_** Both the Ditto client and the external paho client must be disconnected before terminating the program.
-
-Full example of the client connection using an external paho client can be found [here](examples/client_connect_as_class_external_paho.py).
+**_NOTE:_** It is also possible to provide an external Paho instance for communication by using the `paho_client` property of the Client class. Full example of the client connection using an external paho client can be found [here](examples/client_connect_as_class_external_paho.py).
 
 ## Working with features
 
