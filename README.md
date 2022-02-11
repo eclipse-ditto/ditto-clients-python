@@ -165,8 +165,8 @@ It is a good practice to clear all subscriptions before disconnecting the client
 
 ```python
 def disconnect(ditto_client: Client):
-    client.unsubscribe()
-    client.disconnect()
+    ditto_client.unsubscribe(on_message)
+    ditto_client.disconnect()
 ```
 
 **_NOTE:_** If no message handlers are provided to `unsubscribe()` then all will be removed.
