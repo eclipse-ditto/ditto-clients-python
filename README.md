@@ -47,13 +47,13 @@ client = Client(on_connect=on_connect, on_disconnect=on_disconnect)
 After the client is created, it's ready to be connected.
 
 ```python
-client.connect("localhost")
+client.connect(host="localhost")
 ```
 
 The client can be also connected with custom connection configurations.
 
 ```python
-client.connect("localhost", port=1883, keepalive=60)
+client.connect(host="localhost", port=1883, keep–alive=60)
 ```
 
 Full example of the basic client connection can be found [here](examples/client_connect.py).
