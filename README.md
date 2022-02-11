@@ -53,7 +53,7 @@ client.connect(host="localhost")
 The client can be also connected with custom connection configurations.
 
 ```python
-client.connect(host="localhost", port=1883, keep–alive=60)
+client.connect(host="localhost", port=1883, keep_alive=60)
 ```
 
 Full example of the basic client connection can be found [here](examples/client_connect.py).
