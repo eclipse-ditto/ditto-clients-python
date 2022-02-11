@@ -161,12 +161,11 @@ def on_connect(ditto_client: Client):
 
 **_NOTE:_** Multiple handlers can be added for Ditto messages processing.
 
-It is a good practice to clear all subscriptions before disconnecting the client.
+It is a good practice to clear all subscriptions if the client gets disconnected.
 
 ```python
-def disconnect(ditto_client: Client):
+def on_disconnect(ditto_client: Client):
     ditto_client.unsubscribe(on_message)
-    ditto_client.disconnect()
 ```
 
 **_NOTE:_** If no message handlers are provided to `unsubscribe()` then all will be removed.
