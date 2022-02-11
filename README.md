@@ -18,11 +18,13 @@ This repository contains the Python client SDK for [Eclipse Ditto](https://eclip
 
 ## Installation
 
-Install the sources and execute the following command:
+Download the sources and execute the following command:
 
 ```commandline
 make install
 ```
+
+**_NOTE:_** Python >=3.6 is required in order to use the library.
 
 ## Creating and connecting a client
 
