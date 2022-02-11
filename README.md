@@ -58,7 +58,7 @@ Full example of the basic client connection can be found [here](examples/client_
 
 **_NOTE:_** It is possible to create a client instance by inheriting the Client class. The `on_connect` and `on_disconnect` callback methods should be overridden in order to be configured. A separate method can be created in order to connect the client. This allows the client to be connected with custom configurations. Full example of the client connection as a class can be found [here](examples/client_connect_as_class.py).
 
-**_NOTE:_** It is also possible to provide an external Paho instance for communication by using the `paho_client` property of the Client class. Full example of the client connection using an external paho client can be found [here](examples/client_connect_as_class_external_paho.py).
+**_NOTE:_** It is also possible to provide an external Paho instance for communication by using the `paho_client` property of the Client class. Full example of the client connection using an external Paho client can be found [here](examples/client_connect_as_class_external_paho.py).
 
 ## Working with features
 
@@ -79,7 +79,7 @@ The ID provided in `feature()` is used to recognize the feature which will be cr
 
 ```python
 command = Command(NamespacedID().from_string("test.ns:test-name"))
-    .feature("myFeatureID")
+    .feature("МyFeatureID")
     .twin()
     .modify(myFeature)
 ```
@@ -97,7 +97,7 @@ Modify overrides the current feature's property.
 
 ```python
 command = Command(NamespacedID().from_string("test.ns:test-name"))
-    .feature_property("myFeatureID", "myProperty")
+    .feature_property("МyFeatureID", "myProperty")
     .twin()
     .modify("myModifiedValue")
 ```
@@ -115,7 +115,7 @@ Delete command is created using the feature's ID and the property's name.
 
 ```python
 command = Command(NamespacedID().from_string("test.ns:test-name"))
-    .feature_property("myFeatureID", "myProperty")
+    .feature_property("МyFeatureID", "myProperty")
     .twin()
     .delete()
 ```
@@ -132,7 +132,7 @@ A feature can be deleted with a command with the appropriate feature's ID.
 
 ```python
 command = Command(NamespacedID().from_string("test.ns:test-name"))
-    .feature("myFeatureID")
+    .feature("МyFeatureID")
     .twin()
     .delete()
 ```
